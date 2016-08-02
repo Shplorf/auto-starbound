@@ -1,0 +1,8 @@
+---
+- name: Apply starbound configuration
+  hosts: tag_Role_starbound
+  user: ubuntu
+  become: yes
+  become_method: sudo
+  roles:
+    - starbound

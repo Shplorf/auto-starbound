@@ -1,0 +1,64 @@
+---
+- name: Include Steam credentials (steam_user, steam_pass)
+  include_vars: steam_creds.yml
+
+- name: Ensure required packages are installed
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - lib32gcc1
+    - libvorbisfile3
+
+- name: create steam user
+  user:
+    name: steam
+
+- name: ensure steamcmd directory exists
+  file:
+    path: /home/steam/steamcmd
+    state: directory
+    owner: steam
+
+- name: ensure steamcmd is present
+  get_url:
+    url: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
+    dest: /home/steam/steamcmd
+
+- name: ensure steamcmd is extracted
+  unarchive:
+    copy: no
+    src: /home/steam/steamcmd/steamcmd_linux.tar.gz
+    dest: /home/steam/steamcmd
+    creates: /home/steam/steamcmd/steamcmd.sh
+
+- name: Ensure the Steam user owns everything in the steam home directory
+  file:
+    path: /home/steam
+    state: directory
+    recurse: yes
+    owner: steam
+
+- name: ensure Starbound is installed and up-to-date
+  shell: "/home/steam/steamcmd/steamcmd.sh +login {{ steam_user }} {{ steam_pass }} +force_install_dir ../starbound +app_update 211820 +quit"
+  become_user: steam
+  become: no
+
+- name: Ensure the Steam user owns everything in the steam home directory
+  file:
+    path: /home/steam
+    state: directory
+    recurse: yes
+    owner: steam
+
+- name: ensure Starbound is installed as a service
+  template: 
+    src: starbound.j2
+    dest: /etc/init.d/starbound
+    mode: 0777
+    owner: steam
+
+- name: Restart the Starbound service
+  service:
+    name: starbound
+    state: restarted
+    enabled: true
