@@ -32,7 +32,7 @@ resource "aws_security_group" "ssh_and_factorio" {
 
 resource "aws_instance" "starbound-server" {
     ami = "${var.ec2_ami}"
-    instance_type = "t2.micro"
+    instance_type = "t2.medium"
     key_name = "${var.key_pair_name}"
     vpc_security_group_ids = ["${aws_security_group.ssh_and_factorio.id}"]
     tags {
@@ -48,8 +48,5 @@ resource "aws_instance" "starbound-server" {
             user = "${var.user}"
             private_key = "${file(var.private_key_path)}"
         }
-    }
-    provisioner "local-exec" {
-        command = "ansible-playbook main.yml"
     }
 }

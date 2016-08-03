@@ -35,14 +35,14 @@ as_user() {
 }
 
 sb_start() {
-    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
         echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is already running!"
     else
         echo "[$(date +%Y-%m-%H\ %k:%M:%S)] Starting ${SERVICE}..."
         cd ${SB_START_PATH}
         as_user "cd ${SB_START_PATH} && screen -dmS starbound ${INVOCATION}"
         sleep ${SLEEP_TIME}
-        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is now running."
         else
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] Error! Could not start ${SERVICE}!"
@@ -51,14 +51,14 @@ sb_start() {
 }
 
 sb_stop() {
-    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
         echo "[$(date +%Y-%m-%H\ %k:%M:%S)] Stopping ${SERVICE}"
         as_user "screen -p 0 -S starbound -X quit"
         sleep ${SLEEP_TIME}
     else
         echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} was not running."
     fi
-        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] Error! ${SERVICE} could not be stopped."
         else
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is stopped."
@@ -66,7 +66,7 @@ sb_stop() {
 }
 
 sb_update() {
-    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+    if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
         echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is running! Will not start update."
     else
         cd ${STEAMPATH}
@@ -94,7 +94,7 @@ case "$1" in
         sb_start
     ;;
     status)
-        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE} > /dev/null; then
+        if ps ax | grep -v grep | grep -v -i SCREEN | grep ${SERVICE}$ > /dev/null; then
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is running."
         else
             echo "[$(date +%Y-%m-%H\ %k:%M:%S)] ${SERVICE} is not running."

@@ -1,6 +1,10 @@
 ---
-- name: Include Steam credentials (steam_user, steam_pass)
-  include_vars: steam_creds.yml
+- name: Include credentials (steam_user, steam_pass, aws_access_key, aws_secret_key)
+  include_vars: creds.yml
+
+- name: Ensure apt cache is up to up-to-date
+  apt:
+    update_cache: yes
 
 - name: Ensure required packages are installed
   apt:
@@ -8,57 +12,78 @@
   with_items:
     - lib32gcc1
     - libvorbisfile3
+    - python-pip
+    - zip
+
+- name: Ensure required Python packages are installed
+  pip:
+    name: "{{ item }}"
+  with_items:
+    - boto
 
 - name: create steam user
   user:
     name: steam
+  register: fresh_install
 
-- name: ensure steamcmd directory exists
+- name: Ensure steamcmd directory exists
   file:
     path: /home/steam/steamcmd
     state: directory
     owner: steam
 
-- name: ensure steamcmd is present
+- name: Ensure steamcmd is present
   get_url:
     url: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
     dest: /home/steam/steamcmd
+    owner: steam
 
-- name: ensure steamcmd is extracted
+- name: Ensure steamcmd is extracted
   unarchive:
     copy: no
     src: /home/steam/steamcmd/steamcmd_linux.tar.gz
     dest: /home/steam/steamcmd
+    owner: steam
     creates: /home/steam/steamcmd/steamcmd.sh
 
-- name: Ensure the Steam user owns everything in the steam home directory
-  file:
-    path: /home/steam
-    state: directory
-    recurse: yes
-    owner: steam
-
-- name: ensure Starbound is installed and up-to-date
+- name: Ensure Starbound is installed and up-to-date
   shell: "/home/steam/steamcmd/steamcmd.sh +login {{ steam_user }} {{ steam_pass }} +force_install_dir ../starbound +app_update 211820 +quit"
   become_user: steam
-  become: no
+  become: yes
+  when: update or fresh_install.changed
 
-- name: Ensure the Steam user owns everything in the steam home directory
-  file:
-    path: /home/steam
-    state: directory
-    recurse: yes
+- name: Ensure custom configuration is loaded
+  copy:
+    src: "{{ server_config_file }}"
+    dest: /home/steam/starbound/storage/starbound_server.config
     owner: steam
+  register: server_config
 
-- name: ensure Starbound is installed as a service
+- name: Ensure Starbound is installed as a service
   template: 
     src: starbound.j2
     dest: /etc/init.d/starbound
     mode: 0777
     owner: steam
 
-- name: Restart the Starbound service
+- name: Ensure Starbound is restarted if configuration changed
   service:
     name: starbound
     state: restarted
+  become_user: steam
+  when: server_config.changed
+
+- name: Ensure that the universe is backed up if the backup variable is set
+  include: backup.yml
+  when: backup
+
+- name: Ensure that the universe is restored up if the backup variable is set
+  include: restore.yml
+  when: restore
+
+- name: Ensure Starbound is running
+  service:
+    name: starbound
+    state: started
     enabled: true
+  become_user: steam
