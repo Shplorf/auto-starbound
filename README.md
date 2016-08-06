@@ -2,9 +2,13 @@ Automated Starbound Server Setup
 ================================
 
 This project's goal is to automate the setup of a Starbound dedicated server as much as possible.
+
 Using Terraform, the server is created in AWS EC2 and access to it is limited to SSH and port 21025 (that Starbound communicates on).
+
 After Terraform is finished bringing up the instance, it invokes Ansible to configure and start up the Starbound server.
+
 Afterwards, you can run additional Ansible commands to update the server as well as backup and restore your universe from S3.
+
 The Ansible role I use is my own: [Shplorf.starbound](https://github.com/Shplorf/ansible-starbound)
 
 Requirements
@@ -18,15 +22,15 @@ Requirements
 
 Terraform Variables
 -------------------
-variable "region" {default = "us-east-1"}
+- ```variable "region" {default = "us-east-1"}```
 AWS EC2 Region for your instance
-variable "ec2_ami" {default = "ami-cbdd50dc"}
+- ```variable "ec2_ami" {default = "ami-cbdd50dc"}```
 Ubuntu AMI that the instance will be based on. Defaults to Ubuntu 14.04.5 LTS (Trusty Tahr). Nothing else is currently supported.
-variable "user" {default = "ubuntu"}
+- ```variable "user" {default = "ubuntu"}```
 The user that will be used to poll for an ssh connection after the server is created.
-variable "key_pair_name" {}
+- ```variable "key_pair_name" {}```
 The name of the key pair in AWS that you wish to associate with the instance
-variable "private_key_path" {}
+- ```variable "private_key_path" {}```
 The path to your private key file. Used to poll for an ssh connection after the server is created.
 
 Ansible Variables
