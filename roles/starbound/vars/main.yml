@@ -1,3 +1,0 @@
----
-backup_s3_bucket: shplorf-starbound
-server_config_file: /Users/greg/Projects/ansible-starbound/roles/starbound/files/starbound_server.config

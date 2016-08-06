@@ -1,8 +1,16 @@
 ---
+
 - name: Apply starbound configuration
   hosts: tag_Role_starbound
   user: ubuntu
   become: yes
   become_method: sudo
+  pre_tasks:
+    - name: Include Steam and AWS credentials as variables
+      include_vars: credentials.yml
   roles:
-    - starbound
+    - { 
+      role: Shplorf.starbound,
+      starbound_backup_s3_bucket: "shplorf-starbound",
+      starbound_server_config_file: "files/starbound_server.config"
+    }
